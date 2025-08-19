@@ -1,8 +1,11 @@
 import sys
+import api  # Import modul API yang kita buat
+import locale
 from rich.console import Console
 from rich.table import Table
 from rich.prompt import Prompt
-import api  # Import modul API yang kita buat
+from datetime import datetime
+from babel.dates import format_datetime
 
 # Import modul config buatan kita
 import config
@@ -33,17 +36,7 @@ def list_agents(cfg):
         table.add_column("Last Report IP", style="yellow", no_wrap=True)
         table.add_column("Status", style="green", no_wrap=True)
 
-    # Data dummy (nanti kita ganti dengan API call)
-    # agents = [
-    #     {"id": "001", "endpointName": "SERVER A", "osType": "Windows", "status": "Active"},
-    #     {"id": "002", "endpointName": "Agent B", "osType": "Linux", "status": "Inactive"},
-    #     {"id": "003", "endpointName": "Agent C", "osType": "Windows", "status": "Active"}
-    # ]
-
-    # for agent in agents:
-    #     table.add_row(agent["id"], agent["endpointName"], agent["osType"], agent["status"])
-
-    #use API
+        #use API
         for agent in agents:
             # Ambil semua interfaces
             interfaces = agent.get("networkInterfaces", [])
@@ -55,6 +48,7 @@ def list_agents(cfg):
             # Gabungkan jadi string, kalau kosong kasih tanda "-"
             ip_address = ", ".join(ipv4_list) if ipv4_list else "-"
 
+            # Tambahkan baris ke tabel
             table.add_row(
                 agent.get("computerName", "-"),
                 agent.get("osName", "-"),
@@ -70,6 +64,31 @@ def list_agents(cfg):
     except Exception as e:
         console.print(f"[red]Error Load Data: {e}[/red]")  
 
+def detail_user(cfg):
+    try:
+        # Ambil data user
+        user = api.get_user_details(cfg["base_url"], cfg["api_token"])
+        expiredAt = datetime.strptime(user.get("apiToken", {}).get("expiresAt", "-"), "%Y-%m-%dT%H:%M:%SZ")
+        expiredDate = format_datetime(expiredAt, "d MMMM y 'Pukul' HH:mm:ss", locale="id_ID")
+
+        table = Table(title="Detail User")
+        table.add_column("email", style="yellow", no_wrap=True)
+        table.add_column("Nama Lengkap", style="yellow", no_wrap=True)
+        table.add_column("scope", style="blue", no_wrap=True)
+        table.add_column("Level", style="blue", no_wrap=True)
+        table.add_column("Tanggal Expired Token", style="green", no_wrap=True)
+
+        table.add_row(
+            user.get("email", "-"),
+            user.get("fullName", "-"),
+            user.get("scope", "-"),
+            user.get("lowestRole", "-"),
+            expiredDate
+        )
+
+        console.print(table)
+    except Exception as e:
+        console.print(f"[red]Error Load Data: {e}[/red]")
 
 # Main function
 def main():
@@ -92,7 +111,8 @@ def main():
         elif choice == "2":
             console.print("[blue]Detail Agent belum tersedia.[/blue]")
         elif choice == "3":
-            console.print("[blue]Detail User belum tersedia.[/blue]")
+            # console.print("[blue]Detail User belum tersedia.[/blue]")
+            detail_user(cfg)
         elif choice == "4":
             console.print("[blue]Generate Report belum tersedia.[/blue]")
         elif choice == "5":
