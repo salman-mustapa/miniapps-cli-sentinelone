@@ -1,21 +1,14 @@
-"""
-SentinelOne MiniApps CLI
-Copyright (c) 2025 Salman Mustapa
-Released under the MIT License
-https://opensource.org/licenses/MIT
-"""
-
 import sys
-import os
 import pyfiglet
+import os
 from rich.console import Console
-from rich.table import Table
-from rich.prompt import Prompt
 from rich.panel import Panel
-from datetime import datetime
-from babel.dates import format_datetime
+from rich.prompt import Prompt
 
-import api
+# Import menu dari folder CLI
+from cli import list_agents, detail_user, generate_report
+
+# import api
 import config
 
 console = Console()
@@ -36,7 +29,6 @@ def show_footer():
     console.print("[green]© 2025 Salman Mustapa[/green] | [cyan]MIT License[/cyan]")
     console.print("[dim]───────────────────────────────────────────────[/dim]\n")
 
-
 # ─────────────────────────────────────────────
 # PAUSE & CLEAR
 # ─────────────────────────────────────────────
@@ -45,7 +37,6 @@ def pause_and_clear():
     input("\nPress any key to return to menu...")
     os.system("cls" if os.name == "nt" else "clear")
     show_header()
-
 
 # ─────────────────────────────────────────────
 # MENU UTAMA
@@ -62,66 +53,6 @@ def show_menu():
         border_style="cyan"
     )
     console.print(menu_panel)
-
-
-# ─────────────────────────────────────────────
-# LIST AGENTS
-# ─────────────────────────────────────────────
-def list_agents(cfg):
-    """Tampilkan daftar agent dari API"""
-    try:
-        agents = api.get_agents(cfg["base_url"], cfg["api_token"])
-        table = Table(title="List Agents")
-        table.add_column("Endpoint Name", style="yellow")
-        table.add_column("OS", style="magenta")
-        table.add_column("Status", style="green")
-        table.add_column("IP Address", style="cyan")
-
-        for agent in agents:
-            ipv4_list = []
-            for iface in agent.get("networkInterfaces", []):
-                ipv4_list.extend(iface.get("inet", []))
-            ip_addr = ", ".join(ipv4_list) if ipv4_list else "-"
-
-            table.add_row(
-                agent.get("computerName", "-"),
-                agent.get("osName", "-"),
-                "Active" if agent.get("isActive", False) else "Inactive",
-                ip_addr
-            )
-
-        console.print(table)
-
-    except Exception as e:
-        console.print(f"[red]Error Load Data: {e}[/red]")
-
-
-# ─────────────────────────────────────────────
-# DETAIL USER
-# ─────────────────────────────────────────────
-def detail_user(cfg):
-    """Tampilkan detail user dari API"""
-    try:
-        user = api.get_user_details(cfg["base_url"], cfg["api_token"])
-        expired_at_str = user.get("apiToken", {}).get("expiresAt", "-")
-        expired_at = datetime.strptime(expired_at_str, "%Y-%m-%dT%H:%M:%SZ") if expired_at_str != "-" else "-"
-        expired_date = format_datetime(expired_at, "d MMMM y', Pukul' HH:mm:ss", locale="id_ID") if expired_at != "-" else "-"
-
-        table = Table(title="Detail User")
-        table.add_column("Variabel", style="white")
-        table.add_column("Data", style="green")
-
-        table.add_row("Email", user.get("email", "-"))
-        table.add_row("Nama Lengkap", user.get("fullName", "-"))
-        table.add_row("Scope", user.get("scope", "-"))
-        table.add_row("Role", user.get("lowestRole", "-"))
-        table.add_row("Token Expired", expired_date)
-
-        console.print(table)
-
-    except Exception as e:
-        console.print(f"[red]Error Load Data: {e}[/red]")
-
 
 # ─────────────────────────────────────────────
 # MAIN FUNCTION
@@ -154,7 +85,8 @@ def main():
             detail_user(cfg)
             pause_and_clear()
         elif choice == "4":
-            console.print("[blue]Generate Report belum tersedia.[/blue]")
+            # console.print("[blue]Generate Report belum tersedia.[/blue]")
+            generate_report(cfg)
             pause_and_clear()
         elif choice == "5":
             console.print("[bold red]Exiting...[/bold red]")
@@ -166,3 +98,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    
