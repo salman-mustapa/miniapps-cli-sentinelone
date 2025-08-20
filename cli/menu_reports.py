@@ -12,7 +12,7 @@ def generate_report(cfg):
     """
     # Dummy alert data
     alert = {
-        "id": "ALERT-123",
+        "id": "INCIDENT-123456",
         "severity": "High",
         "status": "Open",
         "description": "Malware detected running suspicious process",

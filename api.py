@@ -8,7 +8,7 @@ https://opensource.org/licenses/MIT
 import requests
 
 # Fungsi untuk ambil data agents
-def get_agents(base_url, api_token):
+def get_agents(base_url, api_token, limit=10, cursor=""):
     """
     Ambil list agents dari SentinelOne API
     Args:
@@ -19,14 +19,26 @@ def get_agents(base_url, api_token):
         list: data agents dalam bentuk list of dict
     """
 
-    url = f"{base_url}/agents"
+    url = f"{base_url}/agents?limit={limit}&cursor={cursor}"
     headers = {"Authorization": f"ApiToken {api_token}"}
 
     res = requests.get(url, headers=headers)
 
     if res.status_code == 200:
-        # Ambil field "data" (biasanya di responses SentinelOne)
-        return res.json().get("data", [])
+        # Ambil data agents dari response
+        """
+        Response format:
+        {
+            "data": [
+                {}
+            ],
+            "pagination": {
+                "nextCursor": None,
+                "totalItems": xx,
+            }
+        }
+        """
+        return res.json()
     else:
         raise Exception(f"Gagal ambil agents. Status code: {res.status_code}, Detail: {res.text}")
 

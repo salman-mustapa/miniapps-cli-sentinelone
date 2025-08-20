@@ -61,7 +61,7 @@ def main():
     """Entry point program CLI"""
     show_header()
 
-    # Load config, jika tidak ada minta input user
+    # Load config data config.json. jika tidak ada,maka minta input dari user
     cfg = config.load_config()
     if not cfg:
         console.print("[yellow]File config tidak ditemukan.[/yellow]")
@@ -77,16 +77,20 @@ def main():
 
         if choice == "1":
             list_agents(cfg)
+            show_footer()   
             pause_and_clear()
         elif choice == "2":
             console.print("[blue]Detail Agent belum tersedia.[/blue]")
+            show_footer()
             pause_and_clear()
         elif choice == "3":
             detail_user(cfg)
+            show_footer()
             pause_and_clear()
         elif choice == "4":
             # console.print("[blue]Generate Report belum tersedia.[/blue]")
             generate_report(cfg)
+            show_footer()
             pause_and_clear()
         elif choice == "5":
             console.print("[bold red]Exiting...[/bold red]")
@@ -95,8 +99,15 @@ def main():
         else:
             console.print("[red]Pilihan tidak valid. Silakan coba lagi.[/red]")
 
-
+# ─────────────────────────────────────────────
+# SAFE ENTRY POINT
+# ─────────────────────────────────────────────
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (KeyboardInterrupt, EOFError):
+        console.print("\n[bold red]Exiting...[/bold red]")
+        show_footer()
+        sys.exit(0)
 
     
