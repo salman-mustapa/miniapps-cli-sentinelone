@@ -89,7 +89,7 @@ Domains     : {", ".join(alert['network']['domains'])}
     console.print(Panel(report_content, title="Incident Report", style="bold white"))
 
     # Simpan ke file txt
-    filename = f"report/report_{alert['id']}.docs"
+    filename = f"report/report_{alert['id']}.txt"
     with open(filename, "w") as f:
         f.write(report_content)
 
